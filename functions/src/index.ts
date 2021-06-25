@@ -9,6 +9,35 @@ const PUBLIC_KEY: string = process.env.DISCORD_APPLICATION_PUBLIC_KEY!;
 
 
 /**
+ * Type of Interaction
+ */
+enum InteractionType {
+    PING = 1,
+    APPLICATION_COMMAND = 2,
+    MESSAGE_COMPONENT = 3,
+}
+
+
+/**
+ * Type of Interaction Response
+ */
+enum InteractionResponseType {
+    PONG = 1,
+    CHANNEL_MESSAGE_WITH_SOURCE = 4,
+    DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE = 5,
+    DEFERRED_UPDATE_MESSAGE = 6,
+    UPDATE_MESSAGE = 7,
+}
+
+/**
+ * Flags that can be included in an Interaction Response.
+ */
+enum InteractionResponseFlags {
+    EPHEMERAL = 1 << 6,
+}
+
+
+/**
  * 認証でたかどうか判定する関数
  * @param {Request} request 受け取ったリクエスト
  * @return {boolean} 認証できたか
@@ -35,18 +64,22 @@ export const testBot = functions.https.onRequest((request, response) => {
         return;
     }
     switch (request.body.type) {
-        case 1: {
-            response.json({type: 1});
-            return;
+        case InteractionType.PING: {
+            response.json({type: InteractionResponseType.PONG});
+            break;
+        }
+        case InteractionType.APPLICATION_COMMAND: {
+            response.json({
+                type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                data: {
+                    tts: false,
+                    content: "Congrats on sending your command!",
+                    embeds: [],
+                    flags: InteractionResponseFlags.EPHEMERAL,
+                },
+            });
+            break;
         }
     }
-    response.json({
-        type: 4,
-        data: {
-            tts: false,
-            content: "Congrats on sending your command!",
-            embeds: [],
-        },
-    });
 }
 );
